@@ -78,28 +78,31 @@
                 return;
             }
 
-            // Ganancia si gana la primera apuesta
-            let ganancia1 = (importe1 * cuota1) - importe1;
+            // Ganancia neta si gana la primera apuesta (aplicando comisión)
+            let ganancia1_neta = ((importe1 * cuota1) - importe1) * (1 - comision);
 
-            // Cálculo de la responsabilidad en la apuesta en contra
-            let responsabilidad = (importe1 * (cuota1 - 1)) - gananciaMin;
+            // Responsabilidad en la apuesta en contra (ajustada por la comisión de la primera apuesta)
+            let responsabilidad = ganancia1_neta - gananciaMin;
+
+            // Cálculo del importe a apostar en la segunda apuesta (en contra)
             let importe2 = responsabilidad / (cuota2 - 1);
 
-            // Aplicar la comisión del 6.5% en la ganancia de Betfair
-            let gananciaBetfair = importe2 * (1 - comision);
+            // Aplicar la comisión del 6.5% en la ganancia de Betfair en la segunda apuesta
+            let gananciaBetfair = importe2 * (cuota2 - 1) * (1 - comision);
             let perdidaSiGanaFavor = responsabilidad - gananciaBetfair;
 
-            if (importe2 < 0) {
-                document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible cumplir el mínimo con estas cuotas.</span>";
-            } else {
+            if (importe2 >= 0) {
                 document.getElementById("resultado").innerHTML = `
-                    Debes apostar <strong>${importe2.toFixed(2)} €</strong> en contra.<br>
+                    <strong>Apostar en contra:</strong> ${importe2.toFixed(2)} €.<br>
                     <strong>Responsabilidad en Betfair:</strong> ${responsabilidad.toFixed(2)} €.<br>
                     <strong>Ganancia neta si gana la 2:</strong> ${gananciaBetfair.toFixed(2)} €.<br>
                     <strong>Pérdida si gana la 1:</strong> ${perdidaSiGanaFavor.toFixed(2)} €.
                 `;
+            } else {
+                document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible cumplir el mínimo con estas cuotas.</span>";
             }
         }
     </script>
 </body>
 </html>
+
