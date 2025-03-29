@@ -5,45 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Apuestas</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        input { margin: 5px; padding: 8px; width: 80px; }
-        button { padding: 10px; margin: 10px; cursor: pointer; }
-        .resultado { font-size: 18px; margin-top: 15px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #resultado {
+            margin-top: 15px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h2>Calculadora de Apuestas</h2>
-    <label>Cuota combinada:</label>
-    <input type="number" id="cuotaCombinada" step="0.01">
-    <label>Importe apostado:</label>
-    <input type="number" id="importe" step="0.01">
-    <label>Cuota cobertura:</label>
-    <input type="number" id="cuotaCobertura" step="0.01">
-    <button onclick="calcular()">Calcular</button>
-    
-    <div class="resultado" id="resultado"></div>
+    <div class="container">
+        <h2>Calculadora de Apuestas</h2>
+        <label>Cuota de la Apuesta 1:</label>
+        <input type="number" id="cuota1" step="0.01" min="1" placeholder="Ej: 2.50">
+
+        <label>Cuota de la Apuesta 2:</label>
+        <input type="number" id="cuota2" step="0.01" min="1" placeholder="Ej: 1.80">
+
+        <label>Importe Apostado en la 1:</label>
+        <input type="number" id="importe1" step="0.01" min="0" placeholder="Ej: 100">
+
+        <label>Ganancia Neta Mínima si gana la 2:</label>
+        <input type="number" id="gananciaMin" step="0.01" min="0" placeholder="Ej: 50">
+
+        <button onclick="calcularApuesta()">Calcular Importe en Apuesta 2</button>
+
+        <div id="resultado"></div>
+    </div>
 
     <script>
-        function calcular() {
-            let cuotaCombinada = parseFloat(document.getElementById("cuotaCombinada").value);
-            let importe = parseFloat(document.getElementById("importe").value);
-            let cuotaCobertura = parseFloat(document.getElementById("cuotaCobertura").value);
-            let comision = 0.065; // 6.5% de comisión
+        function calcularApuesta() {
+            let cuota1 = parseFloat(document.getElementById("cuota1").value);
+            let cuota2 = parseFloat(document.getElementById("cuota2").value);
+            let importe1 = parseFloat(document.getElementById("importe1").value);
+            let gananciaMin = parseFloat(document.getElementById("gananciaMin").value);
 
-            if (cuotaCombinada > 0 && importe > 0 && cuotaCobertura > 0) {
-                let gananciaNeta = (cuotaCombinada * importe) - importe;
-                let apuestaCobertura = gananciaNeta / (cuotaCobertura - 1);
-                let apuestaCoberturaFinal = apuestaCobertura / (1 - comision);
-                let beneficioFinal = (importe * cuotaCombinada) - importe - apuestaCoberturaFinal;
-                let cuotaImplicita = (beneficioFinal + importe) / importe;
+            if (isNaN(cuota1) || isNaN(cuota2) || isNaN(importe1) || isNaN(gananciaMin) || cuota1 <= 1 || cuota2 <= 1 || importe1 <= 0 || gananciaMin < 0) {
+                document.getElementById("resultado").innerHTML = "<span style='color: red;'>Por favor, introduce valores válidos.</span>";
+                return;
+            }
 
-                document.getElementById("resultado").innerHTML = `
-                    <p>Apuesta en contra: <strong>${apuestaCoberturaFinal.toFixed(2)} €</strong></p>
-                    <p>Beneficio final: <strong>${beneficioFinal.toFixed(2)} €</strong></p>
-                    <p>Cuota implícita final: <strong>${cuotaImplicita.toFixed(2)}</strong></p>
-                `;
+            // Cálculo de ganancias si gana la primera apuesta
+            let ganancia1 = (importe1 * cuota1) - importe1;
+
+            // Cálculo del importe necesario en la segunda apuesta para cumplir el mínimo
+            let importe2 = (gananciaMin - ganancia1) / (cuota2 - 1);
+
+            if (importe2 < 0) {
+                document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible cumplir el mínimo con estas cuotas.</span>";
             } else {
-                document.getElementById("resultado").innerHTML = "<p>Introduce valores válidos.</p>";
+                document.getElementById("resultado").innerHTML = "Debes apostar <strong>" + importe2.toFixed(2) + " €</strong> en la Apuesta 2.";
             }
         }
     </script>
