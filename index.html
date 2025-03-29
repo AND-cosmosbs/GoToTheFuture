@@ -48,10 +48,10 @@
 <body>
     <div class="container">
         <h2>Calculadora de Apuestas</h2>
-        <label>Cuota de la Apuesta 1:</label>
+        <label>Cuota de la Apuesta 1 (a favor):</label>
         <input type="number" id="cuota1" step="0.01" min="1" placeholder="Ej: 2.50">
 
-        <label>Cuota de la Apuesta 2:</label>
+        <label>Cuota de la Apuesta 2 (en contra - Betfair):</label>
         <input type="number" id="cuota2" step="0.01" min="1" placeholder="Ej: 1.80">
 
         <label>Importe Apostado en la 1:</label>
@@ -71,22 +71,33 @@
             let cuota2 = parseFloat(document.getElementById("cuota2").value);
             let importe1 = parseFloat(document.getElementById("importe1").value);
             let gananciaMin = parseFloat(document.getElementById("gananciaMin").value);
+            let comision = 0.065; // 6.5% comisión en Betfair
 
             if (isNaN(cuota1) || isNaN(cuota2) || isNaN(importe1) || isNaN(gananciaMin) || cuota1 <= 1 || cuota2 <= 1 || importe1 <= 0 || gananciaMin < 0) {
                 document.getElementById("resultado").innerHTML = "<span style='color: red;'>Por favor, introduce valores válidos.</span>";
                 return;
             }
 
-            // Cálculo de ganancias si gana la primera apuesta
+            // Ganancia si gana la primera apuesta
             let ganancia1 = (importe1 * cuota1) - importe1;
 
-            // Cálculo del importe necesario en la segunda apuesta para cumplir el mínimo
-            let importe2 = (gananciaMin - ganancia1) / (cuota2 - 1);
+            // Cálculo de la responsabilidad en la apuesta en contra
+            let responsabilidad = (importe1 * (cuota1 - 1)) - gananciaMin;
+            let importe2 = responsabilidad / (cuota2 - 1);
+
+            // Aplicar la comisión del 6.5% en la ganancia de Betfair
+            let gananciaBetfair = importe2 * (1 - comision);
+            let perdidaSiGanaFavor = responsabilidad - gananciaBetfair;
 
             if (importe2 < 0) {
                 document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible cumplir el mínimo con estas cuotas.</span>";
             } else {
-                document.getElementById("resultado").innerHTML = "Debes apostar <strong>" + importe2.toFixed(2) + " €</strong> en la Apuesta 2.";
+                document.getElementById("resultado").innerHTML = `
+                    Debes apostar <strong>${importe2.toFixed(2)} €</strong> en contra.<br>
+                    <strong>Responsabilidad en Betfair:</strong> ${responsabilidad.toFixed(2)} €.<br>
+                    <strong>Ganancia neta si gana la 2:</strong> ${gananciaBetfair.toFixed(2)} €.<br>
+                    <strong>Pérdida si gana la 1:</strong> ${perdidaSiGanaFavor.toFixed(2)} €.
+                `;
             }
         }
     </script>
