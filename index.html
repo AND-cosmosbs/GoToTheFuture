@@ -68,32 +68,32 @@
             let cuota2 = parseFloat(document.getElementById("cuota2").value);
             let importe1 = parseFloat(document.getElementById("importe1").value);
             let comision = 0.065; // 6.5% comisión en Betfair
-            let gananciaMin = 1; // Queremos exactamente 1€ de ganancia si gana la 2
+            let gananciaMin = 1; // Queremos ganar al menos 1€ en total
 
             if (isNaN(cuota1) || isNaN(cuota2) || isNaN(importe1) || cuota1 <= 1 || cuota2 <= 1 || importe1 <= 0) {
                 document.getElementById("resultado").innerHTML = "<span style='color: red;'>Por favor, introduce valores válidos.</span>";
                 return;
             }
 
-            // Ganancia neta si gana la primera apuesta (aplicando comisión)
+            // Ganancia neta si gana la primera apuesta (con comisión)
             let ganancia1_neta = ((importe1 * cuota1) - importe1) * (1 - comision);
 
-            // Cálculo del importe a apostar en contra para asegurar 1€ de ganancia neta si gana la 2
-            let importe2 = (gananciaMin / ((cuota2 - 1) * (1 - comision)));
+            // Cálculo del importe a apostar en contra para que la ganancia total sea al menos 1€
+            let importe2 = (importe1 * cuota1 * (1 - comision) - importe1 - gananciaMin) / ((cuota2 - 1) * (1 - comision));
 
             // Responsabilidad en la apuesta en contra
             let responsabilidad = importe2 * (cuota2 - 1);
-            let perdidaSiGanaFavor = responsabilidad - gananciaMin;
+            let ganancia2_neta = importe2 * (1 - comision);
 
             if (importe2 >= 0) {
                 document.getElementById("resultado").innerHTML = `
                     <strong>Apostar en contra:</strong> ${importe2.toFixed(2)} €.<br>
                     <strong>Responsabilidad en Betfair:</strong> ${responsabilidad.toFixed(2)} €.<br>
-                    <strong>Ganancia neta si gana la 2:</strong> 1.00 €.<br>
+                    <strong>Ganancia neta si gana la 2:</strong> ${gananciaMin.toFixed(2)} €.<br>
                     <strong>Ganancia neta si gana la 1:</strong> ${ganancia1_neta.toFixed(2)} €.
                 `;
             } else {
-                document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible cumplir la condición con estas cuotas.</span>";
+                document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible garantizar una ganancia mínima con estas cuotas.</span>";
             }
         }
     </script>
