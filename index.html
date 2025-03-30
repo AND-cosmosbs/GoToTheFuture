@@ -57,7 +57,7 @@
         <label>Importe Apostado en la 1:</label>
         <input type="number" id="importe1" step="0.01" min="0" placeholder="Ej: 100">
 
-        <button onclick="calcularApuesta()">Calcular Importe en Apuesta 2</button>
+        <button onclick="calcularApuesta()">Calcular</button>
 
         <div id="resultado"></div>
     </div>
@@ -75,22 +75,25 @@
                 return;
             }
 
-            // Ganancia neta si gana la primera apuesta (con comisión)
+            // Ganancia neta si gana la primera apuesta (descontando comisión)
             let ganancia1_neta = ((importe1 * cuota1) - importe1) * (1 - comision);
 
-            // Cálculo del importe a apostar en contra para que la ganancia total sea al menos 1€
+            // Cálculo del importe a apostar en contra para garantizar 1€ de ganancia neta total
             let importe2 = (importe1 * cuota1 * (1 - comision) - importe1 - gananciaMin) / ((cuota2 - 1) * (1 - comision));
 
             // Responsabilidad en la apuesta en contra
             let responsabilidad = importe2 * (cuota2 - 1);
-            let ganancia2_neta = importe2 * (1 - comision);
+
+            // Cálculo de la cuota implícita de la estrategia
+            let cuotaImplicita = (ganancia1_neta + importe1) / importe1;
 
             if (importe2 >= 0) {
                 document.getElementById("resultado").innerHTML = `
                     <strong>Apostar en contra:</strong> ${importe2.toFixed(2)} €.<br>
                     <strong>Responsabilidad en Betfair:</strong> ${responsabilidad.toFixed(2)} €.<br>
-                    <strong>Ganancia neta si gana la 2:</strong> ${gananciaMin.toFixed(2)} €.<br>
-                    <strong>Ganancia neta si gana la 1:</strong> ${ganancia1_neta.toFixed(2)} €.
+                    <strong>Ganancia neta si gana la 2:</strong> 1.00 €.<br>
+                    <strong>Ganancia neta si gana la 1:</strong> ${ganancia1_neta.toFixed(2)} €.<br>
+                    <strong>Cuota implícita de la estrategia:</strong> ${cuotaImplicita.toFixed(3)}.
                 `;
             } else {
                 document.getElementById("resultado").innerHTML = "<span style='color: red;'>No es posible garantizar una ganancia mínima con estas cuotas.</span>";
